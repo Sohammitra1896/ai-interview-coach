@@ -4,34 +4,33 @@ import plotly.express as px
 import random
 import pdfplumber
 
-st.set_page_config(page_title="InterviewBuddy", layout="wide")
+st.set_page_config(layout="wide", page_title="InterviewBuddy")
 
-# -----------------------------
-# GLOBAL CSS (real styling)
-# -----------------------------
+# --------------------------
+# GLOBAL STYLE
+# --------------------------
 
 st.markdown("""
 <style>
 
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+
 .stApp {
     background: linear-gradient(180deg,#020617,#020617);
-    color: white;
-}
-
-header {visibility: hidden;}
-
-section[data-testid="stSidebar"] {
-    background-color:#020617;
 }
 
 .hero-title {
-    font-size:64px;
+    font-size:70px;
     font-weight:700;
+    text-align:center;
 }
 
 .hero-sub {
-    font-size:20px;
+    font-size:22px;
     color:#94a3b8;
+    text-align:center;
 }
 
 .card {
@@ -44,67 +43,66 @@ section[data-testid="stSidebar"] {
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# HERO
-# -----------------------------
+# --------------------------
+# HERO SECTION
+# --------------------------
 
-col1,col2 = st.columns([1,2])
+st.image("logo.png", width=200)
 
-with col1:
-    st.image("logo.png", width=200)
+st.markdown('<div class="hero-title">InterviewBuddy</div>', unsafe_allow_html=True)
 
-with col2:
-    st.markdown('<div class="hero-title">InterviewBuddy</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-sub">AI Powered Interview Preparation Platform</div>', unsafe_allow_html=True)
+st.markdown(
+'<div class="hero-sub">AI Interview Preparation Platform</div>',
+unsafe_allow_html=True
+)
 
 st.write(" ")
 
-# -----------------------------
+# --------------------------
 # FEATURE SECTION
-# -----------------------------
+# --------------------------
 
-f1,f2,f3 = st.columns(3)
+c1,c2,c3 = st.columns(3)
 
-with f1:
+with c1:
     st.markdown("""
     <div class="card">
-    <h3>AI Interview Practice</h3>
-    Practice technical and behavioural interview questions with AI.
+    <h3>Interview Practice</h3>
+    Practice technical and behavioural interview questions.
     </div>
     """, unsafe_allow_html=True)
 
-with f2:
+with c2:
     st.markdown("""
     <div class="card">
     <h3>Resume Based Questions</h3>
-    Upload your resume and generate interview questions automatically.
+    Upload resume and generate interview questions automatically.
     </div>
     """, unsafe_allow_html=True)
 
-with f3:
+with c3:
     st.markdown("""
     <div class="card">
     <h3>AI Chat Coach</h3>
-    Ask the AI coach how to improve your interview answers.
+    Ask AI how to improve your interview answers.
     </div>
     """, unsafe_allow_html=True)
 
+st.write(" ")
 st.divider()
 
-# -----------------------------
+# --------------------------
 # NAVIGATION
-# -----------------------------
-
-st.sidebar.title("Navigation")
+# --------------------------
 
 page = st.sidebar.radio(
-    "Go to",
-    ["Dashboard","Interview Practice","Resume Questions","AI Chat Coach"]
+"Menu",
+["Dashboard","Interview Practice","Resume Questions","AI Chat Coach"]
 )
 
-# -----------------------------
-# SESSION STORAGE
-# -----------------------------
+# --------------------------
+# SESSION DATA
+# --------------------------
 
 if "scores" not in st.session_state:
     st.session_state.scores = []
@@ -112,25 +110,25 @@ if "scores" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# -----------------------------
+# --------------------------
 # DASHBOARD
-# -----------------------------
+# --------------------------
 
-if page == "Dashboard":
+if page=="Dashboard":
 
     st.header("Dashboard")
 
     m1,m2,m3 = st.columns(3)
 
-    m1.metric("Interviews Taken",len(st.session_state.scores))
+    m1.metric("Interviews Taken", len(st.session_state.scores))
 
-    avg=0
+    avg = 0
     if st.session_state.scores:
-        avg=sum(st.session_state.scores)/len(st.session_state.scores)
+        avg = sum(st.session_state.scores)/len(st.session_state.scores)
 
-    m2.metric("Average Score",round(avg,2))
+    m2.metric("Average Score", round(avg,2))
 
-    m3.metric("Sessions",len(st.session_state.history))
+    m3.metric("Sessions", len(st.session_state.history))
 
     if st.session_state.scores:
 
@@ -147,13 +145,13 @@ if page == "Dashboard":
 
         st.subheader("Interview History")
 
-        st.dataframe(pd.DataFrame(st.session_state.history),use_container_width=True)
+        st.dataframe(pd.DataFrame(st.session_state.history))
 
-# -----------------------------
+# --------------------------
 # INTERVIEW PRACTICE
-# -----------------------------
+# --------------------------
 
-elif page == "Interview Practice":
+elif page=="Interview Practice":
 
     st.header("Practice Interview")
 
@@ -183,9 +181,9 @@ elif page == "Interview Practice":
             "Score":score
         })
 
-# -----------------------------
+# --------------------------
 # RESUME QUESTIONS
-# -----------------------------
+# --------------------------
 
 elif page=="Resume Questions":
 
@@ -213,9 +211,9 @@ elif page=="Resume Questions":
         if "data analysis" in text.lower():
             st.write("How did you clean your dataset")
 
-# -----------------------------
+# --------------------------
 # AI CHAT
-# -----------------------------
+# --------------------------
 
 elif page=="AI Chat Coach":
 
