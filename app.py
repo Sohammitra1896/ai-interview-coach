@@ -4,89 +4,82 @@ import plotly.express as px
 import random
 import pdfplumber
 import json
+import os
 
-st.set_page_config(
-    page_title="InterviewBuddy",
-    layout="wide",
-    page_icon="🚀"
-)
+st.set_page_config(page_title="InterviewBuddy", layout="wide", page_icon="🤖")
 
-# -------------------------------
+# -----------------------
 # GLOBAL STYLE
-# -------------------------------
+# -----------------------
 
 st.markdown("""
 <style>
 
-#MainMenu {visibility:hidden;}
-footer {visibility:hidden;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 
 .stApp {
-background: linear-gradient(180deg,#020617,#020617);
-color:white;
+    background: linear-gradient(180deg,#020617,#0f172a);
+    color:white;
 }
 
 .hero-title {
-font-size:60px;
-font-weight:700;
+    font-size:58px;
+    font-weight:700;
 }
 
 .hero-sub {
-font-size:20px;
-color:#94a3b8;
+    font-size:20px;
+    color:#94a3b8;
 }
 
 .card {
-background:#0f172a;
-padding:25px;
-border-radius:14px;
-border:1px solid #1e293b;
+    padding:25px;
+    border-radius:14px;
+    background:#0f172a;
+    border:1px solid #1e293b;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------
-# LOGO
-# -------------------------------
+# -----------------------
+# LOAD LOGO
+# -----------------------
 
-try:
-    st.image("logo.png", width=200)
-except:
+if os.path.exists("logo.png"):
+    st.image("logo.png", width=180)
+else:
     st.title("InterviewBuddy")
 
-# -------------------------------
+# -----------------------
 # HERO
-# -------------------------------
+# -----------------------
 
 st.markdown('<div class="hero-title">InterviewBuddy</div>', unsafe_allow_html=True)
-
-st.markdown(
-'<div class="hero-sub">AI Interview Preparation Platform</div>',
-unsafe_allow_html=True
-)
+st.markdown('<div class="hero-sub">AI Interview Preparation Platform</div>', unsafe_allow_html=True)
 
 st.write(" ")
 
-# -------------------------------
+# -----------------------
 # FEATURES
-# -------------------------------
+# -----------------------
 
-c1,c2,c3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
 
 with c1:
     st.markdown("""
     <div class="card">
     <h3>Interview Practice</h3>
-    Practice technical and behavioural interview questions.
+    Practice real interview questions and get automated feedback.
     </div>
     """, unsafe_allow_html=True)
 
 with c2:
     st.markdown("""
     <div class="card">
-    <h3>Resume Based Questions</h3>
-    Upload resume and generate interview questions.
+    <h3>Resume Questions</h3>
+    Upload your resume and generate personalized interview questions.
     </div>
     """, unsafe_allow_html=True)
 
@@ -94,93 +87,95 @@ with c3:
     st.markdown("""
     <div class="card">
     <h3>AI Chat Coach</h3>
-    Ask AI how to improve your answers.
+    Ask AI how to answer interview questions better.
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
-# -------------------------------
-# DATA STORAGE
-# -------------------------------
+# -----------------------
+# HISTORY STORAGE
+# -----------------------
 
 DATA_FILE = "history.json"
 
 def load_history():
-    try:
-        with open(DATA_FILE,"r") as f:
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
             return json.load(f)
-    except:
-        return []
+    return []
 
 def save_history(data):
-    with open(DATA_FILE,"w") as f:
-        json.dump(data,f)
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f)
 
 history = load_history()
 
-# -------------------------------
-# NAVIGATION
-# -------------------------------
+# -----------------------
+# SIDEBAR
+# -----------------------
+
+st.sidebar.title("Navigation")
 
 page = st.sidebar.radio(
-"Navigation",
-["Dashboard","Interview Practice","Resume Questions","AI Chat Coach"]
+    "Go to",
+    ["Dashboard","Interview Practice","Resume Questions","AI Chat Coach"]
 )
 
-# -------------------------------
+# -----------------------
 # SESSION DATA
-# -------------------------------
+# -----------------------
 
 if "scores" not in st.session_state:
     st.session_state.scores = []
 
-# -------------------------------
+# -----------------------
 # DASHBOARD
-# -------------------------------
+# -----------------------
 
 if page == "Dashboard":
 
     st.header("Dashboard")
 
-    m1,m2,m3 = st.columns(3)
+    m1, m2, m3 = st.columns(3)
 
-    m1.metric("Interviews Taken",len(st.session_state.scores))
+    m1.metric("Interviews Taken", len(st.session_state.scores))
 
-    avg=0
+    avg = 0
     if st.session_state.scores:
-        avg=sum(st.session_state.scores)/len(st.session_state.scores)
+        avg = sum(st.session_state.scores) / len(st.session_state.scores)
 
-    m2.metric("Average Score",round(avg,2))
+    m2.metric("Average Score", round(avg,2))
 
-    m3.metric("Sessions",len(history))
+    m3.metric("Sessions", len(history))
 
     if st.session_state.scores:
 
-        df=pd.DataFrame({
+        df = pd.DataFrame({
             "Attempt": list(range(1,len(st.session_state.scores)+1)),
             "Score": st.session_state.scores
         })
 
-        fig=px.line(df,x="Attempt",y="Score",markers=True)
+        fig = px.line(df, x="Attempt", y="Score", markers=True,
+                      color_discrete_sequence=["#22c55e"])
 
-        st.plotly_chart(fig,use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
     if history:
 
         st.subheader("Interview History")
 
-        st.dataframe(pd.DataFrame(history))
+        st.dataframe(pd.DataFrame(history), use_container_width=True)
 
-# -------------------------------
+# -----------------------
 # INTERVIEW PRACTICE
-# -------------------------------
+# -----------------------
 
 elif page == "Interview Practice":
 
     st.header("Practice Interview")
 
-    questions=[
+    questions = [
         "Explain Linear Regression",
         "What is Overfitting",
         "Explain Gradient Descent",
@@ -188,45 +183,47 @@ elif page == "Interview Practice":
         "Explain Decision Trees"
     ]
 
-    q=random.choice(questions)
+    q = random.choice(questions)
 
     st.subheader(q)
 
-    ans=st.text_area("Your Answer")
+    ans = st.text_area("Your Answer")
 
     if st.button("Evaluate"):
 
-        score=random.randint(6,9)
+        score = random.randint(6,9)
 
         st.success(f"Score: {score}/10")
 
         st.session_state.scores.append(score)
 
         history.append({
-            "Question":q,
-            "Score":score
+            "Question": q,
+            "Score": score
         })
 
         save_history(history)
 
-# -------------------------------
+# -----------------------
 # RESUME QUESTIONS
-# -------------------------------
+# -----------------------
 
 elif page == "Resume Questions":
 
     st.header("Upload Resume")
 
-    file=st.file_uploader("Upload PDF",type="pdf")
+    file = st.file_uploader("Upload PDF", type="pdf")
 
     if file:
 
         with pdfplumber.open(file) as pdf:
 
-            text=""
+            text = ""
 
             for p in pdf.pages:
-                text+=p.extract_text()
+                txt = p.extract_text()
+                if txt:
+                    text += txt
 
         st.subheader("Generated Questions")
 
@@ -239,18 +236,18 @@ elif page == "Resume Questions":
         if "data analysis" in text.lower():
             st.write("How did you clean your dataset")
 
-# -------------------------------
-# AI CHAT COACH
-# -------------------------------
+# -----------------------
+# AI CHAT
+# -----------------------
 
 elif page == "AI Chat Coach":
 
     st.header("AI Chat Coach")
 
-    q=st.text_input("Ask a question")
+    question = st.text_input("Ask a question")
 
-    if q:
+    if question:
 
         st.success(
-        "A strong answer should include definition, explanation and real-world example."
+            "A strong answer should include definition, explanation and a real-world example."
         )
