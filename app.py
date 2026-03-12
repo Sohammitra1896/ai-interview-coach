@@ -5,7 +5,7 @@ import random
 import pdfplumber
 import json
 import os
-import speech_recognition as sr
+#import speech_recognition as sr
 
 st.set_page_config(page_title="InterviewBuddy", layout="wide", page_icon="🤖")
 
@@ -274,22 +274,3 @@ elif page == "AI Chat Coach":
         else:
             st.chat_message("assistant").write(msg)
 
-# -----------------------------
-# VOICE ASSISTANT
-# -----------------------------
-
-elif page == "Voice Assistant":
-
-    st.header("AI Voice Assistant")
-
-    if st.button("Start Listening"):
-
-        r = sr.Recognizer()
-
-        with sr.Microphone() as source:
-
-            audio = r.listen(source)
-
-        text = r.recognize_google(audio)
-
-        st.write("You said:", text)
