@@ -5,5 +5,4 @@ plotly
 pdfplumber
 sentence-transformers
 torch
-SpeechRecognition
-pyaudio
+openai
