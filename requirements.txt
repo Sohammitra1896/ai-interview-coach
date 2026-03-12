@@ -1,4 +1,7 @@
 streamlit
-sentence-transformers
+pandas
 matplotlib
+plotly
+pdfplumber
+sentence-transformers
 torch
