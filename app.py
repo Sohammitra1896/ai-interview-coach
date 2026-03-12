@@ -68,4 +68,3 @@ if st.session_state.scores:
     ax.set_ylabel("Score")
 
     st.pyplot(fig)
-st.image("logo.png", width=220)
