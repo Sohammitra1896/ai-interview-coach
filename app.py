@@ -5,18 +5,18 @@ import random
 import pdfplumber
 import json
 import os
+import speech_recognition as sr
 
 st.set_page_config(page_title="InterviewBuddy", layout="wide", page_icon="🤖")
 
-# -----------------------
-# GLOBAL STYLE
-# -----------------------
+# -----------------------------
+# STYLING
+# -----------------------------
 
 st.markdown("""
 <style>
-
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
 
 .stApp {
     background: linear-gradient(180deg,#020617,#0f172a);
@@ -24,62 +24,55 @@ footer {visibility: hidden;}
 }
 
 .hero-title {
-    font-size:58px;
+    font-size:60px;
     font-weight:700;
 }
 
 .hero-sub {
-    font-size:20px;
+    font-size:22px;
     color:#94a3b8;
 }
 
 .card {
-    padding:25px;
-    border-radius:14px;
     background:#0f172a;
+    padding:25px;
+    border-radius:12px;
     border:1px solid #1e293b;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------
-# LOAD LOGO
-# -----------------------
+# -----------------------------
+# LOGO
+# -----------------------------
 
 if os.path.exists("logo.png"):
     st.image("logo.png", width=180)
-else:
-    st.title("InterviewBuddy")
-
-# -----------------------
-# HERO
-# -----------------------
 
 st.markdown('<div class="hero-title">InterviewBuddy</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-sub">AI Interview Preparation Platform</div>', unsafe_allow_html=True)
 
 st.write(" ")
 
-# -----------------------
+# -----------------------------
 # FEATURES
-# -----------------------
+# -----------------------------
 
-c1, c2, c3 = st.columns(3)
+c1,c2,c3 = st.columns(3)
 
 with c1:
     st.markdown("""
     <div class="card">
     <h3>Interview Practice</h3>
-    Practice real interview questions and get automated feedback.
+    Practice technical and behavioral interview questions.
     </div>
     """, unsafe_allow_html=True)
 
 with c2:
     st.markdown("""
     <div class="card">
-    <h3>Resume Questions</h3>
-    Upload your resume and generate personalized interview questions.
+    <h3>Resume Based Questions</h3>
+    Upload resume and generate interview questions.
     </div>
     """, unsafe_allow_html=True)
 
@@ -87,67 +80,64 @@ with c3:
     st.markdown("""
     <div class="card">
     <h3>AI Chat Coach</h3>
-    Ask AI how to answer interview questions better.
+    Ask AI how to improve your answers.
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
-# -----------------------
+# -----------------------------
 # HISTORY STORAGE
-# -----------------------
+# -----------------------------
 
 DATA_FILE = "history.json"
 
 def load_history():
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
+        with open(DATA_FILE,"r") as f:
             return json.load(f)
     return []
 
 def save_history(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f)
+    with open(DATA_FILE,"w") as f:
+        json.dump(data,f)
 
 history = load_history()
 
-# -----------------------
-# SIDEBAR
-# -----------------------
-
-st.sidebar.title("Navigation")
+# -----------------------------
+# SIDEBAR NAVIGATION
+# -----------------------------
 
 page = st.sidebar.radio(
-    "Go to",
-    ["Dashboard","Interview Practice","Resume Questions","AI Chat Coach"]
+"Navigation",
+["Dashboard","Interview Practice","Resume Questions","AI Chat Coach","Voice Assistant"]
 )
 
-# -----------------------
-# SESSION DATA
-# -----------------------
+# -----------------------------
+# SESSION STORAGE
+# -----------------------------
 
 if "scores" not in st.session_state:
     st.session_state.scores = []
 
-# -----------------------
+# -----------------------------
 # DASHBOARD
-# -----------------------
+# -----------------------------
 
 if page == "Dashboard":
 
     st.header("Dashboard")
 
-    m1, m2, m3 = st.columns(3)
+    m1,m2,m3 = st.columns(3)
 
-    m1.metric("Interviews Taken", len(st.session_state.scores))
+    m1.metric("Interviews Taken",len(st.session_state.scores))
 
     avg = 0
     if st.session_state.scores:
-        avg = sum(st.session_state.scores) / len(st.session_state.scores)
+        avg = sum(st.session_state.scores)/len(st.session_state.scores)
 
-    m2.metric("Average Score", round(avg,2))
-
-    m3.metric("Sessions", len(history))
+    m2.metric("Average Score",round(avg,2))
+    m3.metric("Sessions",len(history))
 
     if st.session_state.scores:
 
@@ -156,31 +146,47 @@ if page == "Dashboard":
             "Score": st.session_state.scores
         })
 
-        fig = px.line(df, x="Attempt", y="Score", markers=True,
-                      color_discrete_sequence=["#22c55e"])
+        fig = px.line(df,x="Attempt",y="Score",markers=True)
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig,use_container_width=True)
 
     if history:
-
         st.subheader("Interview History")
+        st.dataframe(pd.DataFrame(history))
 
-        st.dataframe(pd.DataFrame(history), use_container_width=True)
-
-# -----------------------
+# -----------------------------
 # INTERVIEW PRACTICE
-# -----------------------
+# -----------------------------
 
 elif page == "Interview Practice":
 
     st.header("Practice Interview")
 
     questions = [
-        "Explain Linear Regression",
-        "What is Overfitting",
-        "Explain Gradient Descent",
-        "What is Machine Learning",
-        "Explain Decision Trees"
+
+    # Data science
+    "Explain linear regression",
+    "Explain logistic regression",
+    "What is overfitting",
+    "What is underfitting",
+    "Explain gradient descent",
+    "What is bias vs variance",
+    "Explain decision trees",
+    "What is random forest",
+    "Explain cross validation",
+
+    # Programming
+    "Explain recursion",
+    "What is time complexity",
+    "Explain O(n log n)",
+    "What is dynamic programming",
+
+    # Data analyst
+    "Explain data cleaning",
+    "What is exploratory data analysis",
+    "Explain correlation vs causation",
+    "What is linear regression used for",
+
     ]
 
     q = random.choice(questions)
@@ -204,9 +210,9 @@ elif page == "Interview Practice":
 
         save_history(history)
 
-# -----------------------
+# -----------------------------
 # RESUME QUESTIONS
-# -----------------------
+# -----------------------------
 
 elif page == "Resume Questions":
 
@@ -218,36 +224,72 @@ elif page == "Resume Questions":
 
         with pdfplumber.open(file) as pdf:
 
-            text = ""
+            text=""
 
             for p in pdf.pages:
                 txt = p.extract_text()
                 if txt:
-                    text += txt
+                    text+=txt
 
         st.subheader("Generated Questions")
 
-        if "python" in text.lower():
-            st.write("Explain a Python project you built")
+        skills = {
+            "python": "Explain a Python project you built",
+            "machine learning": "Explain a machine learning model you trained",
+            "data analysis": "How did you clean your dataset",
+            "sql": "Explain how you optimized a SQL query",
+            "deep learning": "Explain a neural network project",
+            "statistics": "Explain hypothesis testing",
+            "tableau": "Explain a dashboard you created",
+        }
 
-        if "machine learning" in text.lower():
-            st.write("Explain a machine learning model you trained")
+        for skill,q in skills.items():
+            if skill in text.lower():
+                st.write(q)
 
-        if "data analysis" in text.lower():
-            st.write("How did you clean your dataset")
-
-# -----------------------
-# AI CHAT
-# -----------------------
+# -----------------------------
+# AI CHAT COACH
+# -----------------------------
 
 elif page == "AI Chat Coach":
 
     st.header("AI Chat Coach")
 
-    question = st.text_input("Ask a question")
+    if "chat" not in st.session_state:
+        st.session_state.chat = []
 
-    if question:
+    user_input = st.chat_input("Ask an interview question")
 
-        st.success(
-            "A strong answer should include definition, explanation and a real-world example."
-        )
+    if user_input:
+
+        response = "A strong answer should include definition, explanation and a real example."
+
+        st.session_state.chat.append(("user",user_input))
+        st.session_state.chat.append(("assistant",response))
+
+    for role,msg in st.session_state.chat:
+
+        if role=="user":
+            st.chat_message("user").write(msg)
+        else:
+            st.chat_message("assistant").write(msg)
+
+# -----------------------------
+# VOICE ASSISTANT
+# -----------------------------
+
+elif page == "Voice Assistant":
+
+    st.header("AI Voice Assistant")
+
+    if st.button("Start Listening"):
+
+        r = sr.Recognizer()
+
+        with sr.Microphone() as source:
+
+            audio = r.listen(source)
+
+        text = r.recognize_google(audio)
+
+        st.write("You said:", text)
