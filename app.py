@@ -8,10 +8,7 @@ import os
 
 st.set_page_config(page_title="InterviewBuddy", layout="wide", page_icon="🤖")
 
-# --------------------------------
-# UI STYLE
-# --------------------------------
-
+# ---------------- UI STYLE ----------------
 st.markdown("""
 <style>
 #MainMenu {visibility:hidden;}
@@ -38,14 +35,10 @@ padding:25px;
 border-radius:12px;
 border:1px solid #1e293b;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------
-# LOGO
-# --------------------------------
-
+# ---------------- LOGO ----------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=180)
 
@@ -54,10 +47,7 @@ st.markdown('<div class="subtitle">AI Interview Preparation Platform</div>', uns
 
 st.write(" ")
 
-# --------------------------------
-# FEATURES SECTION
-# --------------------------------
-
+# ---------------- FEATURES ----------------
 c1,c2,c3 = st.columns(3)
 
 with c1:
@@ -80,16 +70,13 @@ with c3:
     st.markdown("""
     <div class="card">
     <h3>Performance Analytics</h3>
-    View charts of interview and placement readiness.
+    View charts of interview readiness.
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
-# --------------------------------
-# DATA STORAGE
-# --------------------------------
-
+# ---------------- DATA STORAGE ----------------
 DATA_FILE = "history.json"
 
 def load_data():
@@ -104,37 +91,64 @@ def save_data(data):
 
 history = load_data()
 
-# --------------------------------
-# NAVIGATION
-# --------------------------------
-
+# ---------------- NAVIGATION ----------------
 page = st.sidebar.radio(
 "Navigation",
 ["Dashboard","Interview Practice","Resume Questions","History"]
 )
 
-if "scores" not in st.session_state:
-    st.session_state.scores = []
+# ---------------- QUESTION DATABASE ----------------
+questions = [
+"Explain linear regression",
+"Explain logistic regression",
+"What is overfitting",
+"What is underfitting",
+"Explain gradient descent",
+"What is bias vs variance",
+"Explain decision trees",
+"What is random forest",
+"What is cross validation",
+"What is neural networks",
+"What is feature engineering",
+"What is PCA",
+"What is clustering",
+"What is k-means",
+"What is NLP",
+"What is deep learning",
+"Explain recursion",
+"What is time complexity",
+"What is dynamic programming",
+"What is a hash table",
+"What is polymorphism",
+"What is encapsulation",
+"Explain inheritance",
+"What is REST API",
+"What is normalization",
+"What is indexing",
+"Explain hypothesis testing",
+"What is correlation vs causation",
+"What is regression analysis",
+"What is data cleaning",
+"What is EDA",
+"What is A/B testing"
+]
 
-# --------------------------------
-# DASHBOARD
-# --------------------------------
-
+# ---------------- DASHBOARD ----------------
 if page == "Dashboard":
 
     st.header("Interview Analytics Dashboard")
 
     scores = [item["Score"] for item in history] if history else []
 
-    m1,m2,m3 = st.columns(3)
+    col1,col2,col3 = st.columns(3)
 
-    m1.metric("Total Interviews", len(scores))
+    col1.metric("Total Interviews", len(scores))
 
     avg = sum(scores)/len(scores) if scores else 0
-    m2.metric("Average Score", round(avg,2))
+    col2.metric("Average Score", round(avg,2))
 
     placement_probability = min(95, int(avg*10))
-    m3.metric("Placement Readiness %", placement_probability)
+    col3.metric("Placement Readiness %", placement_probability)
 
     if scores:
 
@@ -149,121 +163,65 @@ if page == "Dashboard":
         fig2 = px.histogram(df, x="Score", nbins=10)
         st.plotly_chart(fig2, use_container_width=True)
 
-# --------------------------------
-# INTERVIEW QUESTIONS DATABASE
-# --------------------------------
-
-questions = [
-
-"Explain linear regression",
-"Explain logistic regression",
-"What is overfitting",
-"What is underfitting",
-"Explain gradient descent",
-"What is bias vs variance",
-"Explain decision trees",
-"What is random forest",
-"What is cross validation",
-"Explain neural networks",
-"What is feature engineering",
-"What is PCA",
-"What is clustering",
-"What is k-means",
-"What is NLP",
-"What is deep learning",
-
-"Explain recursion",
-"What is time complexity",
-"What is O(n log n)",
-"Explain dynamic programming",
-"What is a hash table",
-"What is polymorphism",
-"What is encapsulation",
-"Explain inheritance",
-"What is REST API",
-"What is normalization",
-"What is indexing",
-
-"Explain hypothesis testing",
-"What is correlation vs causation",
-"What is regression analysis",
-"What is data cleaning",
-"What is EDA",
-"What is A/B testing"
-
-]
-
-# --------------------------------
-# INTERVIEW PRACTICE
-# --------------------------------
-
+# ---------------- INTERVIEW PRACTICE ----------------
 elif page == "Interview Practice":
 
     st.header("Practice Interview")
 
-    q = random.choice(questions)
+    question = random.choice(questions)
+    st.subheader(question)
 
-    st.subheader(q)
+    answer = st.text_area("Your Answer")
 
-    ans = st.text_area("Your Answer")
-
-    if st.button("Evaluate"):
+    if st.button("Evaluate Answer"):
 
         score = random.randint(6,9)
 
         st.success(f"Score: {score}/10")
 
         history.append({
-            "Question": q,
+            "Question": question,
             "Score": score
         })
 
         save_data(history)
 
-# --------------------------------
-# RESUME QUESTIONS
-# --------------------------------
-
+# ---------------- RESUME QUESTIONS ----------------
 elif page == "Resume Questions":
 
     st.header("Upload Resume")
 
-    file = st.file_uploader("Upload PDF Resume", type="pdf")
+    uploaded = st.file_uploader("Upload PDF Resume", type="pdf")
 
-    if file:
+    if uploaded:
 
-        with pdfplumber.open(file) as pdf:
+        with pdfplumber.open(uploaded) as pdf:
 
-            text=""
+            text = ""
 
             for page in pdf.pages:
-                txt=page.extract_text()
+                txt = page.extract_text()
                 if txt:
-                    text+=txt
+                    text += txt
 
-        st.subheader("Generated Questions")
+        st.subheader("Generated Interview Questions")
 
         skills = {
-
         "python":"Explain a Python project you built",
         "machine learning":"Explain a machine learning model you trained",
-        "sql":"Explain a complex SQL query you optimized",
+        "sql":"Explain a SQL query you optimized",
         "statistics":"Explain hypothesis testing",
-        "deep learning":"Explain a neural network architecture",
+        "deep learning":"Explain a neural network project",
         "data analysis":"Explain how you cleaned messy data",
-        "tableau":"Explain a dashboard you created",
+        "tableau":"Explain a dashboard you built",
         "nlp":"Explain an NLP project"
-
         }
 
         for skill,q in skills.items():
             if skill in text.lower():
                 st.write(q)
 
-# --------------------------------
-# HISTORY PAGE
-# --------------------------------
-
+# ---------------- HISTORY ----------------
 elif page == "History":
 
     st.header("Interview History")
@@ -272,4 +230,4 @@ elif page == "History":
         df = pd.DataFrame(history)
         st.dataframe(df)
     else:
-        st.write("No interview records yet.")
+        st.write("No interviews recorded yet.")
