@@ -5,13 +5,12 @@ import random
 import pdfplumber
 import json
 import os
-#import speech_recognition as sr
 
 st.set_page_config(page_title="InterviewBuddy", layout="wide", page_icon="🤖")
 
-# -----------------------------
-# STYLING
-# -----------------------------
+# --------------------------------
+# UI STYLE
+# --------------------------------
 
 st.markdown("""
 <style>
@@ -19,44 +18,45 @@ st.markdown("""
 footer {visibility:hidden;}
 
 .stApp {
-    background: linear-gradient(180deg,#020617,#0f172a);
-    color:white;
+background: linear-gradient(180deg,#020617,#0f172a);
+color:white;
 }
 
-.hero-title {
-    font-size:60px;
-    font-weight:700;
+.hero {
+font-size:56px;
+font-weight:700;
 }
 
-.hero-sub {
-    font-size:22px;
-    color:#94a3b8;
+.subtitle {
+color:#94a3b8;
+font-size:18px;
 }
 
 .card {
-    background:#0f172a;
-    padding:25px;
-    border-radius:12px;
-    border:1px solid #1e293b;
+background:#0f172a;
+padding:25px;
+border-radius:12px;
+border:1px solid #1e293b;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
+# --------------------------------
 # LOGO
-# -----------------------------
+# --------------------------------
 
 if os.path.exists("logo.png"):
     st.image("logo.png", width=180)
 
-st.markdown('<div class="hero-title">InterviewBuddy</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-sub">AI Interview Preparation Platform</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero">InterviewBuddy</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">AI Interview Preparation Platform</div>', unsafe_allow_html=True)
 
 st.write(" ")
 
-# -----------------------------
-# FEATURES
-# -----------------------------
+# --------------------------------
+# FEATURES SECTION
+# --------------------------------
 
 c1,c2,c3 = st.columns(3)
 
@@ -64,130 +64,142 @@ with c1:
     st.markdown("""
     <div class="card">
     <h3>Interview Practice</h3>
-    Practice technical and behavioral interview questions.
+    Practice real interview questions and track performance.
     </div>
     """, unsafe_allow_html=True)
 
 with c2:
     st.markdown("""
     <div class="card">
-    <h3>Resume Based Questions</h3>
-    Upload resume and generate interview questions.
+    <h3>Resume Questions</h3>
+    Upload resume and generate personalized questions.
     </div>
     """, unsafe_allow_html=True)
 
 with c3:
     st.markdown("""
     <div class="card">
-    <h3>AI Chat Coach</h3>
-    Ask AI how to improve your answers.
+    <h3>Performance Analytics</h3>
+    View charts of interview and placement readiness.
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
-# -----------------------------
-# HISTORY STORAGE
-# -----------------------------
+# --------------------------------
+# DATA STORAGE
+# --------------------------------
 
 DATA_FILE = "history.json"
 
-def load_history():
+def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE,"r") as f:
             return json.load(f)
     return []
 
-def save_history(data):
+def save_data(data):
     with open(DATA_FILE,"w") as f:
         json.dump(data,f)
 
-history = load_history()
+history = load_data()
 
-# -----------------------------
-# SIDEBAR NAVIGATION
-# -----------------------------
+# --------------------------------
+# NAVIGATION
+# --------------------------------
 
 page = st.sidebar.radio(
 "Navigation",
-["Dashboard","Interview Practice","Resume Questions","AI Chat Coach","Voice Assistant"]
+["Dashboard","Interview Practice","Resume Questions","History"]
 )
-
-# -----------------------------
-# SESSION STORAGE
-# -----------------------------
 
 if "scores" not in st.session_state:
     st.session_state.scores = []
 
-# -----------------------------
+# --------------------------------
 # DASHBOARD
-# -----------------------------
+# --------------------------------
 
 if page == "Dashboard":
 
-    st.header("Dashboard")
+    st.header("Interview Analytics Dashboard")
+
+    scores = [item["Score"] for item in history] if history else []
 
     m1,m2,m3 = st.columns(3)
 
-    m1.metric("Interviews Taken",len(st.session_state.scores))
+    m1.metric("Total Interviews", len(scores))
 
-    avg = 0
-    if st.session_state.scores:
-        avg = sum(st.session_state.scores)/len(st.session_state.scores)
+    avg = sum(scores)/len(scores) if scores else 0
+    m2.metric("Average Score", round(avg,2))
 
-    m2.metric("Average Score",round(avg,2))
-    m3.metric("Sessions",len(history))
+    placement_probability = min(95, int(avg*10))
+    m3.metric("Placement Readiness %", placement_probability)
 
-    if st.session_state.scores:
+    if scores:
 
         df = pd.DataFrame({
-            "Attempt": list(range(1,len(st.session_state.scores)+1)),
-            "Score": st.session_state.scores
+            "Interview": list(range(1,len(scores)+1)),
+            "Score": scores
         })
 
-        fig = px.line(df,x="Attempt",y="Score",markers=True)
+        fig = px.line(df, x="Interview", y="Score", markers=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-        st.plotly_chart(fig,use_container_width=True)
+        fig2 = px.histogram(df, x="Score", nbins=10)
+        st.plotly_chart(fig2, use_container_width=True)
 
-    if history:
-        st.subheader("Interview History")
-        st.dataframe(pd.DataFrame(history))
+# --------------------------------
+# INTERVIEW QUESTIONS DATABASE
+# --------------------------------
 
-# -----------------------------
+questions = [
+
+"Explain linear regression",
+"Explain logistic regression",
+"What is overfitting",
+"What is underfitting",
+"Explain gradient descent",
+"What is bias vs variance",
+"Explain decision trees",
+"What is random forest",
+"What is cross validation",
+"Explain neural networks",
+"What is feature engineering",
+"What is PCA",
+"What is clustering",
+"What is k-means",
+"What is NLP",
+"What is deep learning",
+
+"Explain recursion",
+"What is time complexity",
+"What is O(n log n)",
+"Explain dynamic programming",
+"What is a hash table",
+"What is polymorphism",
+"What is encapsulation",
+"Explain inheritance",
+"What is REST API",
+"What is normalization",
+"What is indexing",
+
+"Explain hypothesis testing",
+"What is correlation vs causation",
+"What is regression analysis",
+"What is data cleaning",
+"What is EDA",
+"What is A/B testing"
+
+]
+
+# --------------------------------
 # INTERVIEW PRACTICE
-# -----------------------------
+# --------------------------------
 
 elif page == "Interview Practice":
 
     st.header("Practice Interview")
-
-    questions = [
-
-    # Data science
-    "Explain linear regression",
-    "Explain logistic regression",
-    "What is overfitting",
-    "What is underfitting",
-    "Explain gradient descent",
-    "What is bias vs variance",
-    "Explain decision trees",
-    "What is random forest",
-    "Explain cross validation",
-
-    # Programming
-    "Explain recursion",
-    "What is time complexity",
-    "Explain O(n log n)",
-    "What is dynamic programming",
-
-    # Data analyst
-    "Explain data cleaning",
-    "What is exploratory data analysis",
-    "Explain correlation vs causation",
-    "What is linear regression used for",
-
-    ]
 
     q = random.choice(questions)
 
@@ -201,24 +213,22 @@ elif page == "Interview Practice":
 
         st.success(f"Score: {score}/10")
 
-        st.session_state.scores.append(score)
-
         history.append({
             "Question": q,
             "Score": score
         })
 
-        save_history(history)
+        save_data(history)
 
-# -----------------------------
+# --------------------------------
 # RESUME QUESTIONS
-# -----------------------------
+# --------------------------------
 
 elif page == "Resume Questions":
 
     st.header("Upload Resume")
 
-    file = st.file_uploader("Upload PDF", type="pdf")
+    file = st.file_uploader("Upload PDF Resume", type="pdf")
 
     if file:
 
@@ -226,51 +236,40 @@ elif page == "Resume Questions":
 
             text=""
 
-            for p in pdf.pages:
-                txt = p.extract_text()
+            for page in pdf.pages:
+                txt=page.extract_text()
                 if txt:
                     text+=txt
 
         st.subheader("Generated Questions")
 
         skills = {
-            "python": "Explain a Python project you built",
-            "machine learning": "Explain a machine learning model you trained",
-            "data analysis": "How did you clean your dataset",
-            "sql": "Explain how you optimized a SQL query",
-            "deep learning": "Explain a neural network project",
-            "statistics": "Explain hypothesis testing",
-            "tableau": "Explain a dashboard you created",
+
+        "python":"Explain a Python project you built",
+        "machine learning":"Explain a machine learning model you trained",
+        "sql":"Explain a complex SQL query you optimized",
+        "statistics":"Explain hypothesis testing",
+        "deep learning":"Explain a neural network architecture",
+        "data analysis":"Explain how you cleaned messy data",
+        "tableau":"Explain a dashboard you created",
+        "nlp":"Explain an NLP project"
+
         }
 
         for skill,q in skills.items():
             if skill in text.lower():
                 st.write(q)
 
-# -----------------------------
-# AI CHAT COACH
-# -----------------------------
+# --------------------------------
+# HISTORY PAGE
+# --------------------------------
 
-elif page == "AI Chat Coach":
+elif page == "History":
 
-    st.header("AI Chat Coach")
+    st.header("Interview History")
 
-    if "chat" not in st.session_state:
-        st.session_state.chat = []
-
-    user_input = st.chat_input("Ask an interview question")
-
-    if user_input:
-
-        response = "A strong answer should include definition, explanation and a real example."
-
-        st.session_state.chat.append(("user",user_input))
-        st.session_state.chat.append(("assistant",response))
-
-    for role,msg in st.session_state.chat:
-
-        if role=="user":
-            st.chat_message("user").write(msg)
-        else:
-            st.chat_message("assistant").write(msg)
-
+    if history:
+        df = pd.DataFrame(history)
+        st.dataframe(df)
+    else:
+        st.write("No interview records yet.")
